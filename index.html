@@ -34,7 +34,9 @@
     overflow:hidden;
   }
   canvas{position:absolute;top:0;left:0;display:block;}
-  #uiCanvas{pointer-events:none;}
+  #bgCanvas{pointer-events:none;z-index:1;}
+  #gameCanvas{pointer-events:auto;touch-action:none;z-index:2;}
+  #fxCanvas{pointer-events:none;z-index:3;}
 
   /* ---------- Header ---------- */
   #header{
@@ -518,10 +520,12 @@ function drawBackground(){
 let pointerActive = false;
 
 function getPointerPos(e){
-  const rect = stageEl.getBoundingClientRect();
+  const rect = gameCanvas.getBoundingClientRect();
   let cx,cy;
   if(e.touches && e.touches.length){
     cx = e.touches[0].clientX; cy = e.touches[0].clientY;
+  } else if(e.changedTouches && e.changedTouches.length){
+    cx = e.changedTouches[0].clientX; cy = e.changedTouches[0].clientY;
   } else {
     cx = e.clientX; cy = e.clientY;
   }
@@ -561,9 +565,10 @@ function onUp(e){
 gameCanvas.addEventListener('mousedown', onDown);
 gameCanvas.addEventListener('mousemove', onMove);
 window.addEventListener('mouseup', onUp);
-gameCanvas.addEventListener('touchstart', (e)=>{ onDown(e); }, {passive:true});
-gameCanvas.addEventListener('touchmove', (e)=>{ onMove(e); e.preventDefault(); }, {passive:false});
-gameCanvas.addEventListener('touchend', (e)=>{ onUp(e); }, {passive:true});
+gameCanvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); onDown(e); }, {passive:false});
+gameCanvas.addEventListener('touchmove', (e)=>{ e.preventDefault(); onMove(e); }, {passive:false});
+gameCanvas.addEventListener('touchend', (e)=>{ e.preventDefault(); onUp(e); }, {passive:false});
+gameCanvas.addEventListener('touchcancel', (e)=>{ e.preventDefault(); onUp(e); }, {passive:false});
 
 /* ============================================================
    SHOOTING
